@@ -2,6 +2,7 @@ import dotenv from "dotenv";
 import express from "express";
 import mongoose from "mongoose";
 import http from "http";
+import morgan from "morgan";
 import fs from "fs";
 import path from "path";
 import { fileURLToPath } from "url";
@@ -20,9 +21,10 @@ const io = initializeSocketIo(server);
 dotenv.config();
 
 const port = process.env.PORT || 3001;
+const uri = process.env.MONGODB_URI;
 
-const allowedOrigins = (process.env.ORIGIN || "http://localhost:3000").split(
-  ","
+const allowedOrigins = (process.env.ORIGIN || "http://localhost:5173").split(
+   ","
 );
 
 const __filename = fileURLToPath(import.meta.url);
@@ -34,54 +36,76 @@ const files = fs.readdirSync(routesPath);
 app.use(cookieParser());
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
+app.use(morgan("dev"));
 
 app.use(
-  cors({
-    origin: function (origin, callback) {
-      if (!origin || allowedOrigins.indexOf(origin) !== -1) {
-        callback(null, true);
-      } else {
-        callback(new Error("Not allowed by CORS"));
-      }
-    },
-    credentials: true,
-  })
+   cors({
+      origin: function (origin, callback) {
+         if (!origin || allowedOrigins.indexOf(origin) !== -1) {
+            callback(null, true);
+         } else {
+            callback(new Error("Not allowed by CORS"));
+         }
+      },
+      credentials: true,
+   })
 );
 
 app.get("/", (req, res) => {
-  res.send("Welcome nang-man API Server!");
+   res.send("Welcome nang-man API Server!");
 });
 
 const startServer = async () => {
-  // 모든 라우터 코드 동적 할당
-  await Promise.all(
-    files.map(async (file) => {
-      if (file.endsWith(".js")) {
-        const route = await import(path.join("file://", routesPath, file));
-        const apiEndpoint = "/api/" + file.replace(".router.js", "");
-        app.use(apiEndpoint, route.default);
-      }
-    })
-  );
-
-  server.listen(port, () => {
-    logger.info(`서버가 http://localhost:${port}에 성공적으로 연결되었습니다.`);
-    mongoose
-      .connect(process.env.MONGODB_URI, {
-        useNewUrlParser: true,
-        useUnifiedTopology: true,
+   // 모든 라우터 코드 동적 할당
+   await Promise.all(
+      files.map(async (file) => {
+         if (file.endsWith(".js")) {
+            const route = await import(path.join("file://", routesPath, file));
+            const apiEndpoint = "/api/" + file.replace(".router.js", "");
+            app.use(apiEndpoint, route.default);
+         }
       })
-      .then(() => logger.info("몽고디비 연결에 성공했습니다."))
-      .catch((e) => console.error(e));
-  });
+   );
 
-  io.on("connection", (socket) => {
-    console.log("User connected: " + socket.id);
+   mongoose
+      .connect(uri, {
+         useNewUrlParser: true,
+         useUnifiedTopology: true,
+      })
+      .then(() => {
+         console.log("[🥦 DATABASE]: Connected to MongoDB successfully!");
+      })
+      .catch((err) => {
+         console.error(`[❌ DATABASE]: ${err}`);
+      })
+      .finally(() => {
+         server.listen(port, () => {
+            console.log(`[✅ SERVER]: Server is listening in PORT ${port} == `);
+         });
+      });
 
-    socket.on("disconnect", () => {
-      console.log("User disconnected: " + socket.id);
-    });
-  });
+   io.on("connection", (socket) => {
+      console.log("User connected: " + socket.id);
+
+      socket.on("joinRoom", (user) => {
+         const { room, id } = user;
+         socket.join(room);
+         socket
+            .to(room)
+            .emit("joinRoom", { message: `User(${id}) joined the room` });
+      });
+
+      socket.on("sendMessage", (data) => {
+         const { room, message, id } = data;
+         socket.broadcast
+            .to(room)
+            .emit("sendMessage", { message: `${id}: ${message}` });
+      });
+
+      socket.on("disconnect", () => {
+         console.log("User disconnected: " + socket.id);
+      });
+   });
 };
 
 startServer();
