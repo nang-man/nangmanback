@@ -30,6 +30,10 @@ const userSchema = new mongoose.Schema(
       minlength: 8,
       required: true,
     },
+    profileIma: {
+      type: String,
+      default: "default url",
+    },
     adminState: {
       type: Boolean,
       default: false,
