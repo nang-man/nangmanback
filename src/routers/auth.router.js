@@ -13,9 +13,9 @@ authRouter.post("/login", AuthController.loginUser);
 authRouter.post("/logout", AuthController.logoutUser);
 
 // accessToken 확인
+authRouter.get("/accessToken", AuthController.accessToken);
 
-// refreshToken 확인
-
-// 회원탈퇴
+// refreshToken 확인 후 accessToken갱신
+authRouter.post("/refreshToken", AuthController.refreshToken);
 
 export default authRouter;

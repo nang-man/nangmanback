@@ -1,3 +1,4 @@
+import { handleServerError } from "../lib/utils.js";
 import AuthService from "../services/auth.service.js";
 
 const AuthController = {
@@ -19,10 +20,7 @@ const AuthController = {
         });
       }
     } catch (error) {
-      console.log(error);
-      res.status(500).json({
-        error: `AuthController.createUser server error : ${error.message}`,
-      });
+      handleServerError(res, error, "createUser");
     }
   },
 
@@ -39,8 +37,8 @@ const AuthController = {
           secure: false,
           httpOnly: true,
         });
-        const { pass, ...rest } = loggedInUser;
-        res.status(201).json(rest);
+        const { pass, ...tokens } = loggedInUser;
+        res.status(201).json(tokens);
       } else {
         res.status(403).json({
           error: loggedInUser.reason,
@@ -48,10 +46,7 @@ const AuthController = {
         });
       }
     } catch (error) {
-      console.log(error);
-      res.status(500).json({
-        error: `AuthController.loginUser server error : ${error.message}`,
-      });
+      handleServerError(res, error, "loginUser");
     }
   },
 
@@ -61,10 +56,43 @@ const AuthController = {
       res.clearCookie("refreshToken");
       res.status(200).json({ message: "로그아웃 완료" });
     } catch (error) {
-      console.log(error);
-      res.status(500).json({
-        error: `AuthController.logoutUser server error : ${error.message}`,
-      });
+      handleServerError(res, error, "logoutUser");
+    }
+  },
+
+  async accessToken(req, res) {
+    try {
+      const userToken = req.headers["authorization"]?.split(" ")[1];
+      const userData = await AuthService.accessToken(userToken);
+      if (userData.pass) {
+        const { pass, ...user } = userData;
+        res.status(201).json(user);
+      } else {
+        res.status(403).json({
+          error: userData.reason,
+          code: "accessToken 확인 실패",
+        });
+      }
+    } catch (error) {
+      handleServerError(res, error, "accessToken");
+    }
+  },
+
+  async refreshToken(req, res) {
+    try {
+      const { refreshToken } = req.body;
+      const newAccessToken = await AuthService.refreshToken(refreshToken);
+      if (newAccessToken.pass) {
+        const { pass, ...accessToken } = newAccessToken;
+        res.status(201).json(accessToken);
+      } else {
+        res.status(403).json({
+          error: newAccessToken.reason,
+          code: "refreshToken 확인 실패",
+        });
+      }
+    } catch (error) {
+      handleServerError(res, error, "refreshToken");
     }
   },
 };

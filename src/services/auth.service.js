@@ -1,4 +1,6 @@
 import {
+  decodeAccessToken,
+  decodeRefreshToken,
   generateAccessToken,
   generateRefreshToken,
   hashedPassword,
@@ -57,6 +59,45 @@ const AuthService = {
         }
       } else {
         return { pass: false, reason: "회원가입이 필요합니다." };
+      }
+    } catch (error) {
+      console.log(error);
+    }
+  },
+
+  async accessToken(userToken) {
+    try {
+      const decodedToken = decodeAccessToken(userToken);
+      const userEmail = decodedToken.email;
+      const decodedUser = await User.findOne({ email: userEmail });
+      if (decodedUser) {
+        return { pass: true, decodedUser };
+      } else {
+        return {
+          pass: false,
+          reason: "해당 토큰의 유저정보가 일치하지 않습니다.",
+        };
+      }
+    } catch (error) {
+      console.log(error);
+    }
+  },
+
+  async refreshToken(refreshToken) {
+    try {
+      const decodedRefreshToken = decodeRefreshToken(refreshToken);
+      const { iat, exp, iss, ...payload } = decodedRefreshToken;
+      const refreshedToken = generateAccessToken(payload);
+      if (refreshedToken) {
+        return {
+          pass: true,
+          refreshedToken,
+        };
+      } else {
+        return {
+          pass: false,
+          reason: "access토큰 재발급 실패, 유효하지 않은 refresh토큰",
+        };
       }
     } catch (error) {
       console.log(error);

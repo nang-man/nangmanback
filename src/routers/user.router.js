@@ -8,4 +8,6 @@ const userRouter = express.Router();
 
 // 유저 프로필이미지 삭제(디폴트이미지로 변경)
 
+// 회원탈퇴
+
 export default userRouter;
