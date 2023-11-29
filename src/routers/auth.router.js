@@ -7,6 +7,7 @@ const authRouter = express.Router();
 authRouter.post("/signup", AuthController.createUser);
 
 // 로그인
+authRouter.post("/login", AuthController.loginUser);
 
 // 로그아웃
 
