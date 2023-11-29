@@ -10,6 +10,7 @@ authRouter.post("/signup", AuthController.createUser);
 authRouter.post("/login", AuthController.loginUser);
 
 // 로그아웃
+authRouter.post("/logout", AuthController.logoutUser);
 
 // accessToken 확인
 

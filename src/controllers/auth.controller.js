@@ -54,6 +54,19 @@ const AuthController = {
       });
     }
   },
+
+  logoutUser(req, res) {
+    try {
+      res.clearCookie("accessToken");
+      res.clearCookie("refreshToken");
+      res.status(200).json({ message: "로그아웃 완료" });
+    } catch (error) {
+      console.log(error);
+      res.status(500).json({
+        error: `AuthController.logoutUser server error : ${error.message}`,
+      });
+    }
+  },
 };
 
 export default AuthController;
