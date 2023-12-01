@@ -7,11 +7,10 @@ import fs from "fs";
 import path from "path";
 import { fileURLToPath } from "url";
 import { dirname } from "path";
-import logger from "winston";
 import cors from "cors";
 import cookieParser from "cookie-parser";
 
-import { initializeSocketIo } from "./src/lib/socket.js";
+import { initializeSocketIo, socketHandler } from "./src/lib/socket.js";
 
 const app = express();
 const server = http.createServer(app);
@@ -85,26 +84,7 @@ const startServer = async () => {
       });
 
    io.on("connection", (socket) => {
-      console.log("User connected: " + socket.id);
-
-      socket.on("joinRoom", (user) => {
-         const { room, id } = user;
-         socket.join(room);
-         socket
-            .to(room)
-            .emit("joinRoom", { message: `User(${id}) joined the room` });
-      });
-
-      socket.on("sendMessage", (data) => {
-         const { room, message, id } = data;
-         socket.broadcast
-            .to(room)
-            .emit("sendMessage", { message: `${id}: ${message}` });
-      });
-
-      socket.on("disconnect", () => {
-         console.log("User disconnected: " + socket.id);
-      });
+      socketHandler(io, socket);
    });
 };
 
