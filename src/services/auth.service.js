@@ -87,11 +87,11 @@ const AuthService = {
     try {
       const decodedRefreshToken = decodeRefreshToken(refreshToken);
       const { iat, exp, iss, ...payload } = decodedRefreshToken;
-      const refreshedToken = generateAccessToken(payload);
-      if (refreshedToken) {
+      const accessToken = generateAccessToken(payload);
+      if (accessToken) {
         return {
           pass: true,
-          refreshedToken,
+          accessToken,
         };
       } else {
         return {
