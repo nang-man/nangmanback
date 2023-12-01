@@ -1,8 +1,11 @@
 import express from "express";
+import { loginRequired } from "../middlewares/loginRequired.js";
+import UserController from "../controllers/user.controller.js";
 
 const userRouter = express.Router();
 
 // 마이페이지 수정
+userRouter.patch("/", loginRequired, UserController.updateUser);
 
 // 유저 프로필이미지 수정
 

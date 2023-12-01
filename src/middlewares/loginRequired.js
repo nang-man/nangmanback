@@ -1,0 +1,30 @@
+import jwt from "jsonwebtoken";
+import { decodeAccessToken } from "../lib/utils.js";
+
+export const loginRequired = (req, res, next) => {
+  const userToken =
+    req.headers["authorization"]?.split(" ")[1] || req.cookies["accessToken"];
+  if (!userToken || userToken === "null" || userToken === undefined) {
+    return res.status(403).json({
+      result: "forbidden-approach",
+      message: "로그인이 필요한 서비스입니다.",
+    });
+  }
+  try {
+    const decodedData = decodeAccessToken(userToken);
+    req._id = decodedData.userOId;
+    next();
+  } catch (error) {
+    if (error instanceof jwt.TokenExpiredError) {
+      return res.status(401).json({
+        error: "TokenExpiredError",
+        message: "토큰이 만료되었습니다.",
+      });
+    } else {
+      return res.status(401).json({
+        error: "InvalidTokenError",
+        message: "유효하지 않은 토큰입니다.",
+      });
+    }
+  }
+};
