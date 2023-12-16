@@ -1,15 +1,9 @@
 import mongoose from "mongoose";
-import { v4 as uuidv4 } from "uuid";
+import joi from "joi";
 
 const roomSchema = new mongoose.Schema(
    {
-      roomId: {
-         type: String,
-         default: uuidv4,
-         unique: true,
-         required: true,
-      },
-      roomName: {
+      name: {
          type: String,
          required: true,
       },
@@ -17,17 +11,16 @@ const roomSchema = new mongoose.Schema(
          type: Number,
          required: true,
       },
+      tags: {
+         type: [String],
+      },
       owner: {
          type: mongoose.Schema.Types.ObjectId,
+         ref: "User",
          required: true,
       },
       participants: {
-         type: [mongoose.Schema.Types.ObjectId],
-         required: true,
-      },
-      chats: {
-         type: [mongoose.Schema.Types.ObjectId],
-         default: [],
+         type: [{ type: mongoose.Schema.Types.ObjectId, ref: "User" }],
       },
    },
    { timestamps: true }
@@ -35,3 +28,13 @@ const roomSchema = new mongoose.Schema(
 
 const Room = mongoose.model("Room", roomSchema);
 export default Room;
+
+export const validateRoom = (room) => {
+   const schema = joi.object({
+      name: joi.string().required(),
+      maxNum: joi.number().required(),
+      owner: joi.string().required(),
+   });
+
+   return schema.validate(room);
+};
