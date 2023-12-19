@@ -1,5 +1,5 @@
-import mongoose from "mongoose";
-import { v4 as uuidv4 } from "uuid";
+import mongoose, { mongo } from 'mongoose';
+import { v4 as uuidv4 } from 'uuid';
 
 const userSchema = new mongoose.Schema(
   {
@@ -31,7 +31,7 @@ const userSchema = new mongoose.Schema(
     },
     profileImg: {
       type: String,
-      default: "default url",
+      default: 'default url',
     },
     adminState: {
       type: Boolean,
@@ -51,5 +51,5 @@ const userSchema = new mongoose.Schema(
   { timestamps: true }
 );
 
-const User = mongoose.model("User", userSchema);
+const User = mongoose.model('User', userSchema);
 export default User;
