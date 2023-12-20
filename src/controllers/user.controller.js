@@ -1,26 +1,27 @@
-import { handleServerError } from "../lib/utils.js";
-import UserService from "../services/user.service.js";
+import { handleServerError, hashedPassword } from '../lib/utils.js';
+import UserService from '../services/user.service.js';
 
 const UserController = {
   async updateUser(req, res) {
     try {
       const { userOId } = req._id;
-      const { name, phone, profileImg } = req.body;
+      const { name, phone, profileImg, password } = req.body;
       const updatedUser = await UserService.updateUser(userOId, {
         name,
         phone,
         profileImg,
+        password: hashedPassword(password),
       });
       if (updatedUser.pass) {
         res.status(201).json(updatedUser);
       } else {
         res.status(403).json({
           error: updatedUser.reason,
-          code: "마이페이지 수정 실패",
+          code: '유저 정보 업데이트 실패',
         });
       }
     } catch (error) {
-      handleServerError(res, error, "updateUser");
+      handleServerError(res, error, 'updateUser');
     }
   },
 };
