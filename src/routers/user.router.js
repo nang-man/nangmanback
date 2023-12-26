@@ -11,10 +11,10 @@ userRouter.get('/', UserController.readUsers);
 userRouter.get('/:id', UserController.readUser);
 
 // 마이페이지 수정
-userRouter.patch('/:id', UserController.updateUser);
+userRouter.patch('/:id', loginRequired, UserController.updateUser);
 
 // 패스워드 수정
-userRouter.patch('/:id/password', UserController.updatePassword);
+userRouter.patch('/:id/password', loginRequired, UserController.updatePassword);
 
 // 유저 프로필이미지 수정
 
