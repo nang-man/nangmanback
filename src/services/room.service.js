@@ -27,7 +27,7 @@ const RoomService = {
     try {
       const updatedRoom = await Room.updateOne({ _id: id }, body);
       if (!updatedRoom.nModified === 0) {
-        return { pass: false, reason: 'Error with updaing the room' };
+        return { pass: false, reason: 'Error with updating the room' };
       }
       return { pass: true };
     } catch (error) {
