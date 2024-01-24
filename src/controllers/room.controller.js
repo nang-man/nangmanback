@@ -44,10 +44,12 @@ const RoomController = {
 
     if (error) {
       res.status(400).json({ message: formatError(error) });
+      return;
     }
 
     if (req.body.maxNum > 4 || req.body.maxNum < 0) {
       res.status(400).json({ message: 'Invalid max number' });
+      return;
     }
 
     try {

@@ -1,40 +1,42 @@
-import mongoose from "mongoose";
-import joi from "joi";
+import mongoose from 'mongoose';
+import joi from 'joi';
 
 const roomSchema = new mongoose.Schema(
-   {
-      name: {
-         type: String,
-         required: true,
-      },
-      maxNum: {
-         type: Number,
-         required: true,
-      },
-      tags: {
-         type: [String],
-      },
-      owner: {
-         type: mongoose.Schema.Types.ObjectId,
-         ref: "User",
-         required: true,
-      },
-      participants: {
-         type: [{ type: mongoose.Schema.Types.ObjectId, ref: "User" }],
-      },
-   },
-   { timestamps: true }
+  {
+    name: {
+      type: String,
+      required: true,
+    },
+    maxNum: {
+      type: Number,
+      required: true,
+    },
+    tags: {
+      type: [String],
+    },
+    owner: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'User',
+      required: true,
+    },
+    participants: {
+      type: [{ type: mongoose.Schema.Types.ObjectId, ref: 'User' }],
+    },
+  },
+  { timestamps: true }
 );
 
-const Room = mongoose.model("Room", roomSchema);
+const Room = mongoose.model('Room', roomSchema);
 export default Room;
 
 export const validateRoom = (room) => {
-   const schema = joi.object({
-      name: joi.string().required(),
-      maxNum: joi.number().required(),
-      owner: joi.string().required(),
-   });
+  const schema = joi.object({
+    name: joi.string().required(),
+    maxNum: joi.number().required(),
+    tags: joi.array().items(joi.string()).allow(null),
+    owner: joi.string().required(),
+    participants: joi.array().items(joi.string()),
+  });
 
-   return schema.validate(room);
+  return schema.validate(room);
 };
