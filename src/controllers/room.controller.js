@@ -3,6 +3,22 @@ import { handleServerError, formatError, checkRoomExistence } from '../lib/utils
 import RoomService from '../services/room.service.js';
 
 const RoomController = {
+  async readRoom(req, res) {
+    try {
+      const rooms = await RoomService.readAllRooms();
+      if (rooms.pass) {
+        res.status(200).json(rooms.rooms);
+      } else {
+        res.status(404).json({
+          error: rooms.reason,
+          code: 'Room 정보 조회 실패',
+        });
+      }
+    } catch (error) {
+      handleServerError(res, error, 'readRoom');
+    }
+  },
+
   async readRoomById(req, res) {
     const { roomId } = req.params;
     if (!id) {

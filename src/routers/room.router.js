@@ -3,6 +3,8 @@ import RoomController from '../controllers/room.controller.js';
 
 const roomRouter = express.Router();
 
+// Room 전체 조회
+roomRouter.get('/', RoomController.readRoom);
 // roomID에 따른 Room 조회
 roomRouter.get('/:id', RoomController.readRoomById);
 // Room 생성

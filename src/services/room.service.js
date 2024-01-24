@@ -1,6 +1,15 @@
 import Room from '../models/room.model.js';
 
 const RoomService = {
+  async readAllRooms() {
+    try {
+      const rooms = await Room.find();
+      return { pass: true, rooms };
+    } catch (error) {
+      return { pass: false, reason: error };
+    }
+  },
+
   async readRoomById(id) {
     try {
       const room = await Room.findOne({ _id: id });
